@@ -1,6 +1,7 @@
-DECLARE risk_free_rate FLOAT64 DEFAULT 0.05;
-DECLARE target_risk FLOAT64 DEFAULT 0.02;
-CREATE OR REPLACE TABLE `portfolio-risk-engine.gold.price_action` AS
+{{ config(materialized='table') }}
+
+{% set risk_free_rate = 0.05 %}
+{% set target_risk = 0.02 %}
 
 WITH rolling_vol AS (
   SELECT
@@ -29,7 +30,7 @@ WITH rolling_vol AS (
         ORDER BY date
         ROWS BETWEEN 89 PRECEDING AND CURRENT ROW
     ), 6) AS rollvol90
-  FROM `portfolio-risk-engine.silver.price_returns`
+  FROM {{ ref('price_returns') }}
 ),
 
 rolling_avg AS (
@@ -60,13 +61,13 @@ sharpe_ratio AS (
   SELECT 
     *,
     ROUND (
-      (rollavg20 - (risk_free_rate/252)) / NULLIF(rollvol20, 0), 4
+      (rollavg20 - ({{ risk_free_rate }}/252)) / NULLIF(rollvol20, 0), 4
     ) AS shrp20,
     ROUND (
-      (rollavg60 - (risk_free_rate/252)) / NULLIF(rollvol60, 0), 4
+      (rollavg60 - ({{ risk_free_rate }}/252)) / NULLIF(rollvol60, 0), 4
     ) AS shrp60,
     ROUND (
-      (rollavg90 - (risk_free_rate/252)) / NULLIF(rollvol90, 0), 4
+      (rollavg90 - ({{ risk_free_rate }}/252)) / NULLIF(rollvol90, 0), 4
     ) AS shrp90
   FROM rolling_avg
 ),
@@ -75,13 +76,13 @@ position_size AS (
   SELECT 
     *,
     ROUND (
-      target_risk / rollvol20
+      {{ target_risk }} / rollvol20
     , 4) AS pos_size20,
     ROUND (
-      target_risk / rollvol60
+      {{ target_risk }} / rollvol60
     , 4) AS pos_size60,
     ROUND (
-      target_risk / rollvol90
+      {{ target_risk }} / rollvol90
     , 4) AS pos_size90        
   FROM sharpe_ratio
 )
