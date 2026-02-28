@@ -9,7 +9,7 @@ import os
 PROJECT_ID = "portfolio-risk-engine"
 DATASET_ID = "bronze"
 TABLE_ID = "raw_prices"
-CREDENTIALS_PATH = "credentials/portfolio-risk-engine-65c639cdfbdf.json"
+CREDENTIALS_PATH = os.environ.get("CREDENTIALS_PATH", "credentials/portfolio-risk-engine-65c639cdfbdf.json")
 
 TICKERS = ["AAPL", "NVDA", "SPY", "BTC-USD", "SOL-USD", "GC=F"]
 START_DATE = "2020-01-01"

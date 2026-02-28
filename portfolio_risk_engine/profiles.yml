@@ -1,0 +1,14 @@
+portfolio_risk_engine:
+  outputs:
+    dev:
+      dataset: gold
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+      keyfile: ../credentials/portfolio-risk-engine.json
+      location: europe-west1
+      method: service-account
+      priority: interactive
+      project: portfolio-risk-engine
+      threads: 4
+      type: bigquery
+  target: dev
