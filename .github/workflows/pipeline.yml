@@ -1,0 +1,42 @@
+name: Portfolio Risk Pipeline
+
+on:
+  schedule:
+    - cron: '0 1 * * *' # Runs daily at 1:00 AM
+  workflow_dispatch: # Allows manual triggering of the workflow from Github
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        run: |
+          pip install yfinance pandas google-cloud-bigquery db-dtypes pandas-gbq
+        
+      - name: Create credentials file
+        run: |
+          echo '${{ secrets.GCP_CREDENTIALS }}' > credentials/portfolio-risk-engine.json
+
+      - name: Run ingestion script
+        run: python ingestion/fetch_prices.py
+        env:
+          CREDENTIALS_PATH: credentials/portfolio-risk-engine.json
+
+      - name: Install dbt
+        run: pip install dbt-bigquery
+      
+      - name: Run dbt models
+        run: |
+          cd portfolio_risk_engine
+          dbt run
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
