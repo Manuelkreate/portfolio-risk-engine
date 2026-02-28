@@ -24,6 +24,7 @@ jobs:
         
       - name: Create credentials file
         run: |
+          mkdir -p credentials
           echo '${{ secrets.GCP_CREDENTIALS }}' > credentials/portfolio-risk-engine.json
 
       - name: Run ingestion script
