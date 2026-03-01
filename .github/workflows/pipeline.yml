@@ -27,6 +27,25 @@ jobs:
           mkdir -p credentials
           echo '${{ secrets.GCP_CREDENTIALS }}' > credentials/portfolio-risk-engine.json
 
+      - name: Create dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          portfolio_risk_engine:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account
+                project: portfolio-risk-engine
+                dataset: gold
+                keyfile: ../credentials/portfolio-risk-engine.json
+                location: europe-west1
+                threads: 4
+                job_execution_timeout_seconds: 300
+                job_retries: 1
+                priority: interactive
+            target: dev
+          EOF
       - name: Run ingestion script
         run: python ingestion/fetch_prices.py
         env:
