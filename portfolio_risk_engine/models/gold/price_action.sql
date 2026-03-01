@@ -17,19 +17,19 @@ WITH rolling_vol AS (
         PARTITION BY ticker
         ORDER BY date
         ROWS BETWEEN 19 PRECEDING AND CURRENT ROW
-    ), 6) AS rollvol20,
+    ), 6) AS volatility_20d,
     ROUND (
       STDDEV(daily_return) OVER (
         PARTITION BY ticker
         ORDER BY date
         ROWS BETWEEN 59 PRECEDING AND CURRENT ROW
-    ), 6) AS rollvol60,    
+    ), 6) AS volatility_60d,    
     ROUND (
       STDDEV(daily_return) OVER (
         PARTITION BY ticker
         ORDER BY date
         ROWS BETWEEN 89 PRECEDING AND CURRENT ROW
-    ), 6) AS rollvol90
+    ), 6) AS volatility_90d
   FROM {{ ref('price_returns') }}
 ),
 
@@ -41,19 +41,19 @@ rolling_avg AS (
         PARTITION BY ticker
         ORDER BY date
         ROWS BETWEEN 19 PRECEDING AND CURRENT ROW
-    ), 6) AS rollavg20,
+    ), 6) AS avg_return_20d,
     ROUND (
       AVG(rolling_vol.daily_return) OVER (
         PARTITION BY ticker
         ORDER BY date
         ROWS BETWEEN 59 PRECEDING AND CURRENT ROW
-    ), 6) AS rollavg60,    
+    ), 6) AS avg_return_60d,    
     ROUND (
       AVG(rolling_vol.daily_return) OVER (
         PARTITION BY ticker
         ORDER BY date
         ROWS BETWEEN 89 PRECEDING AND CURRENT ROW
-    ), 6) AS rollavg90
+    ), 6) AS avg_return_90d
   FROM rolling_vol
 ),
 
@@ -61,14 +61,14 @@ sharpe_ratio AS (
   SELECT 
     *,
     ROUND (
-      (rollavg20 - ({{ risk_free_rate }}/252)) / NULLIF(rollvol20, 0), 4
-    ) AS shrp20,
+      (avg_return_20d - ({{ risk_free_rate }}/252)) / NULLIF(volatility_20d, 0), 4
+    ) AS sharpe_20d,
     ROUND (
-      (rollavg60 - ({{ risk_free_rate }}/252)) / NULLIF(rollvol60, 0), 4
-    ) AS shrp60,
+      (avg_return_60d - ({{ risk_free_rate }}/252)) / NULLIF(volatility_60d, 0), 4
+    ) AS sharpe_60d,
     ROUND (
-      (rollavg90 - ({{ risk_free_rate }}/252)) / NULLIF(rollvol90, 0), 4
-    ) AS shrp90
+      (avg_return_90d - ({{ risk_free_rate }}/252)) / NULLIF(volatility_90d, 0), 4
+    ) AS sharpe_90d
   FROM rolling_avg
 ),
 
@@ -76,14 +76,14 @@ position_size AS (
   SELECT 
     *,
     ROUND (
-      {{ target_risk }} / rollvol20
-    , 4) AS pos_size20,
+      {{ target_risk }} / volatility_20d
+    , 4) AS position_size_20d,
     ROUND (
-      {{ target_risk }} / rollvol60
-    , 4) AS pos_size60,
+      {{ target_risk }} / volatility_60d
+    , 4) AS position_size_60d,
     ROUND (
-      {{ target_risk }} / rollvol90
-    , 4) AS pos_size90        
+      {{ target_risk }} / volatility_90d
+    , 4) AS position_size_90d        
   FROM sharpe_ratio
 )
 
