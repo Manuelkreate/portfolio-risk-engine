@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: price_action
+    description: "Gold layer table containing rolling volatility, Sharpe Ratios and position sizing recommendations for each asset."
+    columns:
+      - name: ticker
+        description: "Asset ticker symbol"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['AAPL', 'NVDA', 'SPY', 'BTC-USD', 'SOL-USD', 'GC=F']
+      - name: date
+        description: "Trading date"
+        tests:
+          - not_null
+      - name: close_price
+        description: "Daily closing price of the asset"
+        tests:
+          - not_null
+
+  - name: vw_position_recommendations
+    description: "Normalized position sizing recommendations based on volatility parity, calculated on the most recent shared date across all assets."
+    columns:
+      - name: ticker
+        description: "Asset ticker symbol"
+        tests:
+          - not_null
+          - unique
+
+  - name: vw_volatility_trend
+    description: "View of historical rolling volatility for all assets, filtered to remove early NULL rows where insufficient data existed for window calculations."
+    columns:
+      - name: ticker
+        description: "Asset ticker symbol"
+      - name: date
+        description: "Trading date"
+      - name: volatility_20d
+        description: "20-day rolling volatility of daily returns"
+      - name: volatility_60d
+        description: "60-day rolling volatility of daily returns"
+      - name: volatility_90d
+        description: "90-day rolling volatility of daily returns"
