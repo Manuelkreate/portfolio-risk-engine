@@ -2,6 +2,14 @@
 
 Most investors track what their assets are worth. Few track whether the risk they're taking is actually worth the return. The Portfolio Risk Engine bridges that gap — an automated data pipeline that calculates volatility-adjusted metrics and position size recommendations across your entire portfolio, so you always know if the reward justifies the risk.
 
+## Dashboard
+
+### Risk Intelligence
+![Risk Intelligence Dashboard](assets/risk_intelligence.png)
+
+### Portfolio Recommendations
+![Portfolio Recommendations](assets/portfolio_recommendations.png)
+
 ## Architecture
 
 The architecture takes shape in 3 layers:
@@ -18,6 +26,8 @@ The architecture takes shape in 3 layers:
 - **BigQuery** — data warehouse where all three architecture layers live
 - **dbt** — structures and manages the SQL transformation pipeline
 - **GitHub Actions** — automates the entire pipeline on a nightly schedule
+- **Power BI** — dashboard layer for risk intelligence and portfolio recommendations
+
 
 ## How It Works
 
@@ -34,6 +44,7 @@ dbt orchestrates the Silver and Gold transformations, and GitHub Actions runs th
 - Google Cloud account with BigQuery enabled
 - A GCP service account with BigQuery Data Editor and Job User roles
 - dbt-bigquery installed
+- Power BI Desktop
 
 ### Steps
 
@@ -60,6 +71,8 @@ cd portfolio_risk_engine
 dbt run
 ```
 
+6. Open `visualization/portfolio_risk_engine_dashboard.pbix` in Power BI Desktop
+
 ## Assets Tracked
 
 | Ticker | Asset |
@@ -70,3 +83,11 @@ dbt run
 | BTC-USD | Bitcoin |
 | SOL-USD | Solana |
 | GC=F | Gold Futures |
+
+## Key Concepts
+
+| Metric | What It Tells You |
+|--------|------------------|
+| Rolling Volatility | How unpredictable an asset has been over 20, 60, or 90 days |
+| Sharpe Ratio | Whether the return justifies the risk (above 1 is good, negative means T-bills are better) |
+| Position Size | Recommended portfolio weight based on volatility parity |
