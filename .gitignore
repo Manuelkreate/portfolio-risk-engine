@@ -5,3 +5,5 @@ credentials/
 __pycache__/
 *.pyc
 logs/
+
+.env
