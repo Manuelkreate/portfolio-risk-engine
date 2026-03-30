@@ -49,7 +49,7 @@ jobs:
       - name: Run ingestion script
         run: python ingestion/fetch_prices.py
         env:
-          CREDENTIALS_PATH: credentials/portfolio-risk-engine.json
+          GOOGLE_CREDENTIALS_PATH: credentials/portfolio-risk-engine.json
 
       - name: Install dbt
         run: pip install dbt-bigquery
